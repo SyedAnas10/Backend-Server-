@@ -1,15 +1,31 @@
+// Importing Node Modules
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const mongoose = require('mongoose');
 
+// defining routers for each component
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 
+// important data models or Schema from the models folder
+const Dishes = require('./models/dishes');
+
+// setting up mongoose client with the running aready running mongodb server
+const url = 'mongodb://localhost:27017/conFusion';
+const connect = mongoose.connect(url);
+connect.then((db) => {
+  console.log('Succesfully connected to Server!');
+}, (err)=>{
+    console.log('There is an error \n' + err);
+  });
+
+// initialising app with express
 var app = express();
 
 // view engine setup
@@ -22,6 +38,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// setting up routers to use with corresponding endpoint
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/dishes', dishRouter);

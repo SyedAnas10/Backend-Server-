@@ -13,10 +13,7 @@ var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 
-// important data models or Schema from the models folder
-const Dishes = require('./models/dishes');
-
-// setting up mongoose client with the running aready running mongodb server
+// setting up mongoose client with the already running mongodb server
 const url = 'mongodb://localhost:27017/conFusion';
 const connect = mongoose.connect(url);
 connect.then((db) => {
@@ -32,10 +29,43 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+// express middleware from which the app would run sequentially
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('12345-67890-09876-54321'));
+
+// implementing basic authentication 
+function auth(req, res, next) {
+  if(!req.signedCookies.user){
+    var authHeader = req.headers.authorization;
+    
+    if(!authHeader){
+      var err = new Error('Authentication failed!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      return next(err);
+    }
+    
+    var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+    if( auth[0] === 'admin' && auth[1] === 'password'){
+      res.cookie('user','admin', {signed:true});
+      next();
+    }
+    else{
+      var err = new Error('Authentication failed!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      return next(err);
+    }
+  }
+  else{
+    next();
+  } 
+}
+app.use(auth);
+
+// setting up express router to serve static pages in public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // setting up routers to use with corresponding endpoint

@@ -6,7 +6,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
-var fileStore = require('session-file-store')(session);
+var FileStore = require('session-file-store')(session);
 
 // defining routers for each component
 var indexRouter = require('./routes/index');
@@ -44,33 +44,27 @@ app.use(session({
   store: new FileStore()
 }));
 
+// setting up routers to be used without logging in or any signup required
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
 // implementing basic authentication 
 function auth(req, res, next) {
-  if(!req.session.user){
-    var authHeader = req.headers.authorization;
-    
-    if(!authHeader){
-      var err = new Error('Authentication failed!');
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
+    if(!req.session.user) {
+      var err = new Error('You are not authenticated!');
+      err.status = 403;
       return next(err);
-    }
-    
-    var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    if( auth[0] === 'admin' && auth[1] === 'password'){
-      req.session.user = 'admin';
-      next();
     }
     else{
-      var err = new Error('Authentication failed!');
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
+      if( req.session.user === 'authenticated'){
+        next();
+      }
+      else{
+        var err = new Error('You are not authenticated!');
+      err.status = 403;
       return next(err);
+      }
     }
-  }
-  else{
-    next();
-  } 
 }
 app.use(auth);
 
@@ -78,8 +72,6 @@ app.use(auth);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // setting up routers to use with corresponding endpoint
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);

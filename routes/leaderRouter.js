@@ -1,11 +1,15 @@
 // importing node modules
 const express = require('express');
 const bodyParser = require('body-parser');
+const authenticate = require('../authenticate');
 
 const Leaders = require('../models/leader');
 
 const leaderRouter = express.Router();
 leaderRouter.use(bodyParser.json());
+
+/* the put, post and delete endpoints defined in this router will
+only be accessed after verification */ 
 
 // Implementing '/leaders' endpoint to be used
 leaderRouter.route('/')
@@ -17,7 +21,7 @@ leaderRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     Leaders.create(req.body).then((leaders) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type', 'application/json');
@@ -25,11 +29,11 @@ leaderRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('Put operation is not supported on /leaders endpoint.' );
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Leaders.deleteMany({}).then((resp) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type','application/json');
@@ -48,11 +52,11 @@ leaderRouter.route('/:leaderId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('Post operation can not be supported on /leaders/' +req.params.leaderId);
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     Leaders.findByIdAndUpdate(req.params.leaderId, {
         $set: req.body
     },{ new:true }).then((leaders) => {
@@ -62,7 +66,7 @@ leaderRouter.route('/:leaderId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Leaders.findByIdAndDelete(req.params.leaderId).then((resp) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type','application/json');

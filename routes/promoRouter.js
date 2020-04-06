@@ -1,10 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const authenticate = require('../authenticate');
 
 const Promotions = require('../models/promotions');
 
 const promoRouter = express.Router();
 promoRouter.use(bodyParser.json());
+
+/* the put, post and delete endpoints defined in this router will
+only be accessed after verification */ 
 
 // Implementing '/promotions' endpoint to be used
 promoRouter.route('/')
@@ -16,7 +20,7 @@ promoRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     Promotions.create(req.body).then((promotions) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type', 'application/json');
@@ -24,11 +28,11 @@ promoRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('Put operation is not supported on /promotions endpoint.' );
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Promotions.deleteMany({}).then((resp) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type','application/json');
@@ -47,11 +51,11 @@ promoRouter.route('/:promoId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end('Post operation can not be supported on /promotions/' +req.params.promoId);
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
     Promotions.findByIdAndUpdate(req.params.promoId, {
         $set: req.body
     },{ new:true }).then((promotions) => {
@@ -61,7 +65,7 @@ promoRouter.route('/:promoId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Promotions.findByIdAndDelete(req.params.promoId).then((resp) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type','application/json');

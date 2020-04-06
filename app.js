@@ -6,7 +6,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
+var passport = require('passport');
+var authenticate = require('./authenticate');
 var FileStore = require('session-file-store')(session);
+var config = require('./congif');
 
 // defining routers for each component
 var indexRouter = require('./routes/index');
@@ -16,7 +19,7 @@ var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 
 // setting up mongoose client with the already running mongodb server
-const url = 'mongodb://localhost:27017/conFusion';
+const url = config.mongoUrl;
 const connect = mongoose.connect(url);
 connect.then((db) => {
   console.log('Succesfully connected to Server!');
@@ -36,37 +39,12 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser('12345-67890-09876-54321'));
-app.use(session({
-  name: 'session-id',
-  secret: '12345-67890-09876-54321',
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}));
+
+app.use(passport.initialize());
 
 // setting up routers to be used without logging in or any signup required
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
-// implementing basic authentication 
-function auth(req, res, next) {
-    if(!req.session.user) {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-    }
-    else{
-      if( req.session.user === 'authenticated'){
-        next();
-      }
-      else{
-        var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-      }
-    }
-}
-app.use(auth);
 
 // setting up express router to serve static pages in public folder
 app.use(express.static(path.join(__dirname, 'public')));

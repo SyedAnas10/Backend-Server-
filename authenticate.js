@@ -36,8 +36,8 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
                 return done(err, false);
             }
             else if(user){
-                return done(null, user);
-            }
+                return done(null, user);   
+            }  
             else{
                 return done(null, false);
             }
@@ -46,3 +46,17 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
 
 // a function to authenticate a user using jwt strategy
 exports.verifyUser = passport.authenticate('jwt', {session:false});
+
+
+// a function to authenticate a user using jwt strategy
+exports.verifyAdmin = function(req, res, next){
+    if(!req.user.admin){
+        err = new Error("This function is reserved for Admins only");
+        err.status = 403;
+        next(err);
+    }
+    else{
+        next();
+    }
+}
+

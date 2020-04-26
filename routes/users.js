@@ -46,7 +46,6 @@ router.post('/signup', (req, res, next) => {
 
 // implementing a login endpoint to login a user and create a token for the user
 router.post('/login', passport.authenticate('local'), (req, res) => {
- 
   var Token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');

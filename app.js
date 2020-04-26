@@ -17,6 +17,7 @@ var usersRouter = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
+var uploadRouter = require('./routes/uploadRouter');
 
 // setting up mongoose client with the already running mongodb server
 const url = config.mongoUrl;
@@ -45,12 +46,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // express middleware from which the app would run sequentially
-app.use(logger('dev'));
-app.use(express.json());
+app.use(logger('dev')); // uses morgan package
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: false }));
-//app.use(cookieParser('12345-67890-09876-54321'));
+//app.use(cookieParser('12345-67890-09876-54321'));  this line is used only when to put cookies on the server 
 
-app.use(passport.initialize());
+app.use(passport.initialize()); // uses passport package
 
 // setting up routers to be used without logging in or any signup required
 app.use('/', indexRouter);
@@ -63,6 +64,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
+app.use('/imageUpload', uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

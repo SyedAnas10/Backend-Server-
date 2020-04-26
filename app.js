@@ -30,6 +30,16 @@ connect.then((db) => {
 // initialising app with express
 var app = express();
 
+// redirecting all insecure requests on server on port:3000 to secure port:3443
+app.all('*', (req, res, next) => {
+  if(req.secure){
+    return next();
+  }
+  else{
+    res.redirect(307, 'https://' +req.hostname+ ':' +app.get('secPort')+ req.url);
+  }
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

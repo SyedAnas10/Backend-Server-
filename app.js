@@ -56,10 +56,8 @@ app.use(passport.initialize()); // uses passport package
 // setting up routers to be used without logging in or any signup required
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
 // setting up express router to serve static pages in public folder
 app.use(express.static(path.join(__dirname, 'public')));
-
 // setting up routers to use with corresponding endpoint
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);

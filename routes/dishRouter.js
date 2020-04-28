@@ -16,7 +16,7 @@ only be accessed after verification */
 dishRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
-    Dishes.find({}).populate('comments.author')
+    Dishes.find(req.query).populate('comments.author')
     .then((dishes) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type','application/json');

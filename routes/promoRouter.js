@@ -15,7 +15,7 @@ only be accessed after verification */
 promoRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
-    Promotions.find({}).then((promotions) => {
+    Promotions.find(req.query).then((promotions) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type', 'application/json');
         res.json(promotions);

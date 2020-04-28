@@ -16,7 +16,7 @@ only be accessed after verification */
 leaderRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
-    Leaders.find({}).then((leaders) => {
+    Leaders.find(req.query).then((leaders) => {
         res.statusCode = 200;
         res.setHeaders = ('Content-Type', 'application/json');
         res.json(leaders);
